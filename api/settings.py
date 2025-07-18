@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -153,8 +159,15 @@ SPECTACULAR_SETTINGS = {
             'description': 'Call management and webhook endpoints'
         },
         {
-            'name': 'Hello',
+            'name': 'Test',
             'description': 'Test endpoints for API health checks'
         },
     ]
 }
+
+###############################################################################
+# Firebase Configuration ---------------------------------------------------- #
+###############################################################################
+
+FIREBASE_CRED_PATH = os.getenv('FIREBASE_CRED_PATH')
+FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')

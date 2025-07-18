@@ -1,3 +1,5 @@
 djangorestframework
 drf-spectacular
 pydantic
+firebase-admin
+python-dotenv

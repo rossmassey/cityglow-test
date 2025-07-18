@@ -1,13 +1,13 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiRequest, OpenApiResponse
+from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiRequest, OpenApiResponse
-from drf_spectacular.types import OpenApiTypes
-from pydantic import ValidationError
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from api.calls.services import HelloService
 from api.calls.schemas import HelloRequest, HelloResponse
+from api.calls.services import HelloService
 from api.calls.utils import pydantic_to_openapi_schema
 
 
@@ -18,7 +18,7 @@ class HelloView(APIView):
     permission_classes = [AllowAny]  # No authentication required for hello world
 
     @extend_schema(
-        tags=['Hello'],
+        tags=['Test'],
         summary='Get hello world message',
         description='Returns a hello world message with optional personalization',
         parameters=[
@@ -76,7 +76,7 @@ class HelloView(APIView):
         return Response(hello_response.model_dump(), status=status.HTTP_200_OK)
 
     @extend_schema(
-        tags=['Hello'],
+        tags=['Test'],
         summary='Post hello world message',
         description='Returns a hello world message with name from request body',
         request=OpenApiRequest(
@@ -120,3 +120,69 @@ class HelloView(APIView):
                 {"error": "Invalid request data", "details": e.errors()},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class FirestoreTestView(APIView):
+    """
+    Test view for Firestore database connection
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        tags=['Test'],
+        summary='Test Firestore connection',
+        description='Tests the Firestore database connection by writing and reading a test document',
+        responses={
+            200: OpenApiResponse(
+                description='Firestore connection successful',
+                examples=[
+                    OpenApiExample(
+                        'Success',
+                        value={
+                            'status': 'success',
+                            'message': 'Firestore connection working',
+                            'test_doc_id': 'test_123',
+                            'timestamp': '2024-01-15T10:30:00Z'
+                        }
+                    )
+                ]
+            ),
+            500: OpenApiResponse(description='Firestore connection failed')
+        }
+    )
+    def get(self, request):
+        """
+        GET /calls/hello/firestore-test/
+        
+        Tests Firestore database connection
+        """
+        try:
+            from api.database import get_firestore_client
+            from datetime import datetime
+
+            # Get Firestore client
+            db = get_firestore_client()
+
+            # Create a test document
+            test_doc = {
+                'message': 'Firestore connection test',
+                'timestamp': datetime.utcnow(),
+                'source': 'cityglow-api'
+            }
+
+            # Write test document to logs collection
+            doc_ref = db.collection('logs').add(test_doc)
+            doc_id = doc_ref[1].id
+
+            return Response({
+                'status': 'success',
+                'message': 'Firestore connection working',
+                'test_doc_id': doc_id,
+                'timestamp': test_doc['timestamp'].isoformat()
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Firestore connection failed: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

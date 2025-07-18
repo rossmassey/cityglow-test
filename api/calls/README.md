@@ -5,21 +5,25 @@ This app uses a **Pydantic-only** approach for API documentation and validation.
 ## Architecture
 
 ### 📋 **Pydantic Schemas** (`schemas.py`)
+
 - Define request/response models with validation
 - Automatic JSON schema generation
 - Type safety and IDE support
 
 ### 🛠 **Services** (`services/`)
+
 - Business logic functions
 - Return Pydantic models directly
 - Reusable across views
 
 ### 🌐 **Views** (`views/`)
+
 - Use Pydantic for validation
 - Use `OpenApiRequest`/`OpenApiResponse` for documentation
 - No DRF serializers needed!
 
 ### 🔧 **Utils** (`utils.py`)
+
 - `pydantic_to_openapi_schema()` converts Pydantic models to OpenAPI schemas
 - Used with drf-spectacular for clean documentation
 

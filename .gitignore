@@ -209,3 +209,6 @@ __marimo__/
 fastapi-example/
 sms-test-example/
 thespian-example/
+
+# firebase key
+firebase-key.json
