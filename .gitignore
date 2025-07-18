@@ -201,3 +201,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# pycharm
+.idea/
+
+# example folders
+fastapi-example/
+sms-test-example/
+thespian-example/
