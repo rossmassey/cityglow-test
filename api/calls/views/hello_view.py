@@ -2,13 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiRequest, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from pydantic import ValidationError
 
 from api.calls.services import HelloService
 from api.calls.schemas import HelloRequest, HelloResponse
-from api.calls.serializers import HelloRequestSerializer, HelloResponseSerializer
+from api.calls.utils import pydantic_to_openapi_schema
 
 
 class HelloView(APIView):
@@ -34,7 +34,12 @@ class HelloView(APIView):
                 ]
             ),
         ],
-        responses={200: HelloResponseSerializer},
+        responses={
+            200: OpenApiResponse(
+                response=pydantic_to_openapi_schema(HelloResponse),
+                description='Successful hello world response'
+            )
+        },
         examples=[
             OpenApiExample(
                 'Default Response',
@@ -74,18 +79,25 @@ class HelloView(APIView):
         tags=['Hello'],
         summary='Post hello world message',
         description='Returns a hello world message with name from request body',
-        request=HelloRequestSerializer,
-        responses={200: HelloResponseSerializer},
-        examples=[
-            OpenApiExample(
-                'Request with name',
-                value={"name": "Sveta"}
-            ),
-            OpenApiExample(
-                'Request without name',
-                value={}
-            ),
-        ]
+        request=OpenApiRequest(
+            request=pydantic_to_openapi_schema(HelloRequest),
+            examples=[
+                OpenApiExample(
+                    'Request with name',
+                    value={"name": "Sveta"}
+                ),
+                OpenApiExample(
+                    'Request without name',
+                    value={}
+                ),
+            ]
+        ),
+        responses={
+            200: OpenApiResponse(
+                response=pydantic_to_openapi_schema(HelloResponse),
+                description='Successful hello world response'
+            )
+        }
     )
     def post(self, request):
         """
