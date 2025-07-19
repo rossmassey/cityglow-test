@@ -25,7 +25,8 @@ def handle_elevenlabs_webhook(report: dict):
         ended_reason=report["data"]["metadata"]["termination_reason"],
         caller_name=report["data"]["analysis"]["data_collection_results"]["name"]["value"],
         success_evaluation=report["data"]["analysis"]["call_successful"],
-        cost=report["data"]["metadata"]["cost"]
+        cost=report["data"]["metadata"]["cost"],
+        phone_number=report["data"]["metadata"]["phone_call"]["external_number"]
     )
 
     # Save to Firestore (convert to dict for Firestore)

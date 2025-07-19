@@ -16,6 +16,7 @@ class CallData(BaseModel):
     success_evaluation: Optional[str] = Field(default="", description="Success evaluation from analysis")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="When the record was created")
     cost: float = Field(default=0.0, description="Cost of the call")
+    phone_number: Optional[str] = Field(default="", description="Client phone number")
 
     @field_validator('summary', 'transcript', 'recording_url', 'ended_reason', 'caller_name', 'success_evaluation', mode='before')
     @classmethod
@@ -35,7 +36,8 @@ class CallData(BaseModel):
                 "caller_name": "John Doe",
                 "success_evaluation": "Good",
                 "created_at": "2025-07-19T00:08:16.000000",
-                "cost": 0.05
+                "cost": 0.05,
+                "phone_number": "+1234567890"
             }
         }
 
