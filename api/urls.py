@@ -19,11 +19,13 @@ from django.urls import path, include
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+
 def health_check(request):
     """Simple health check endpoint"""
     return JsonResponse({
         "status": "healthy",
     })
+
 
 urlpatterns = [
     path('', health_check, name='health-check'),

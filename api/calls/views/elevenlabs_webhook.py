@@ -14,16 +14,16 @@ class ElevenLabsWebhookView(View):
     """
     Webhook endpoint for receiving ElevenLabs events.
     """
-    
+
     def post(self, request):
         """Handle ElevenLabs webhook POST requests"""
         try:
             # Parse JSON data
             json_data = json.loads(request.body)
-            
+
             # Delegate to service
             return handle_elevenlabs_webhook(json_data)
-            
+
         except json.JSONDecodeError:
             print("Could not parse body as JSON")
             return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -31,4 +31,4 @@ class ElevenLabsWebhookView(View):
             print(f"Error processing ElevenLabs webhook: {str(e)}")
             import traceback
             traceback.print_exc()
-            return JsonResponse({"error": "Internal server error"}, status=500) 
+            return JsonResponse({"error": "Internal server error"}, status=500)

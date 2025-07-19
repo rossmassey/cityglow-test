@@ -18,7 +18,14 @@ class CallData(BaseModel):
     cost: float = Field(default=0.0, description="Cost of the call")
     phone_number: Optional[str] = Field(default="", description="Client phone number")
 
-    @field_validator('summary', 'transcript', 'recording_url', 'ended_reason', 'caller_name', 'success_evaluation', mode='before')
+    @field_validator('summary',
+                     'transcript',
+                     'recording_url',
+                     'ended_reason',
+                     'caller_name',
+                     'success_evaluation',
+                     'phone_number',
+                     mode='before')
     @classmethod
     def convert_none_to_empty_string(cls, v):
         """Convert None values to empty strings"""
@@ -38,31 +45,5 @@ class CallData(BaseModel):
                 "created_at": "2025-07-19T00:08:16.000000",
                 "cost": 0.05,
                 "phone_number": "+1234567890"
-            }
-        }
-
-
-class VapiWebhookData(BaseModel):
-    """Pydantic model for incoming Vapi webhook data"""
-    message: dict = Field(..., description="The webhook message data")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "message": {
-                    "type": "end-of-call-report",
-                    "summary": "Customer inquiry about product availability",
-                    "transcript": "Hello, I was wondering...",
-                    "recordingUrl": "https://example.com/recording.mp3",
-                    "startedAt": "2025-07-19T00:06:31.932Z",
-                    "endedAt": "2025-07-19T00:08:15.432Z",
-                    "endedReason": "customer-ended-call",
-                    "analysis": {
-                        "structuredData": {
-                            "name": "John Doe"
-                        },
-                        "successEvaluation": "Good"
-                    }
-                }
             }
         }

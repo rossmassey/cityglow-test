@@ -17,14 +17,14 @@ class VapiWebhookView(View):
     """
     Webhook endpoint for receiving Vapi events.
     """
-    
+
     def post(self, request):
         """Handle Vapi webhook POST requests"""
         try:
             json_data = json.loads(request.body)
 
             return handle_vapi_webhok(json_data)
-                    
+
         except json.JSONDecodeError:
             print("Could not parse body as JSON")
             return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -32,4 +32,4 @@ class VapiWebhookView(View):
             print(f"Error processing webhook: {str(e)}")
             import traceback
             traceback.print_exc()
-            return JsonResponse({"error": "Internal server error"}, status=500) 
+            return JsonResponse({"error": "Internal server error"}, status=500)
