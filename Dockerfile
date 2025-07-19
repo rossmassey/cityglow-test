@@ -31,10 +31,9 @@ RUN chmod +x /entrypoint.sh \
 USER appuser
 EXPOSE $PORT
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "api.asgi:application",
-     "-k", "uvicorn.workers.UvicornWorker",
-     "--bind", "0.0.0.0:$PORT",
-     "--workers", "2",
-     "--threads", "4",
-     "--timeout", "120"]
-     
+
+CMD exec gunicorn api.asgi:application \
+      -k uvicorn.workers.UvicornWorker \
+      --bind 0.0.0.0:$PORT \
+      --workers 2 \
+      --threads 4
