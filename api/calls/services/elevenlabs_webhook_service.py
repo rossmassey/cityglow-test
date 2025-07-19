@@ -8,6 +8,8 @@ def handle_elevenlabs_webhook(report: dict):
     """Handle ElevenLabs webhook data"""
     print("=== ELEVENLABS WEBHOOK RECEIVED ===")
 
+    print(report)
+
     transcript_str = ""
     for transcript_item in report["data"]["transcript"]:
         transcript_str += f"{transcript_item['role']}: {transcript_item['message']}\n"
