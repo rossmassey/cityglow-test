@@ -4,6 +4,8 @@ from django.http import JsonResponse
 
 from api.calls.schemas import CallData
 from api.database import get_calls_collection
+from api.email_service import send_email
+from api import settings
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,11 @@ def handle_elevenlabs_webhook(report: dict):
     calls_collection = get_calls_collection()
     doc_ref = calls_collection.add(call_data.model_dump())
     doc_id = doc_ref[1].id
+
+
+    # Send email summary
+    subject = f"Call Summary: {doc_id}"
+    send_email(settings.EMAIL_SUMMARY_RECIPIENT, subject, call_data)
 
     logger.info(f"Saved call to Firestore with ID: {doc_id}")
     logger.info(f"Caller: {call_data.caller_name}")
