@@ -3,7 +3,7 @@ FROM python:3.11-slim AS builder
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no‑cache-dir \
+RUN pip install -no‑cache-dir \
       -r requirements.txt \
       django>=5.2.0 uvicorn[standard]>=0.24.0 gunicorn>=21.0.0
 
