@@ -1,21 +1,27 @@
 from typing import Optional
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class CallData(BaseModel):
     """Pydantic model for call data saved to Firestore"""
-    summary: str = Field(default="", description="AI-generated summary of the call")
-    transcript: str = Field(default="", description="Complete transcript of the call")
-    recording_url: str = Field(default="", description="URL to the call recording")
+    summary: Optional[str] = Field(default="", description="AI-generated summary of the call")
+    transcript: Optional[str] = Field(default="", description="Complete transcript of the call")
+    recording_url: Optional[str] = Field(default="", description="URL to the call recording")
     started_at: Optional[datetime] = Field(None, description="When the call started")
     ended_at: Optional[datetime] = Field(None, description="When the call ended")
-    ended_reason: str = Field(default="", description="Reason why the call ended")
-    caller_name: str = Field(default="", description="Name extracted from structured data analysis")
-    success_evaluation: str = Field(default="", description="Success evaluation from analysis")
+    ended_reason: Optional[str] = Field(default="", description="Reason why the call ended")
+    caller_name: Optional[str] = Field(default="", description="Name extracted from structured data analysis")
+    success_evaluation: Optional[str] = Field(default="", description="Success evaluation from analysis")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="When the record was created")
     cost: float = Field(default=0.0, description="Cost of the call")
+
+    @field_validator('summary', 'transcript', 'recording_url', 'ended_reason', 'caller_name', 'success_evaluation', mode='before')
+    @classmethod
+    def convert_none_to_empty_string(cls, v):
+        """Convert None values to empty strings"""
+        return "" if v is None else v
 
     class Config:
         json_schema_extra = {

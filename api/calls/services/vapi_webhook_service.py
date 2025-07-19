@@ -51,7 +51,7 @@ def handle_vapi_webhok(report: dict):
         print(f"Summary: {call_data.summary}")
         
     else:
-        print(f"Ignoring webhook type: {json_data.get('message', {}).get('type')}")
+        print(f"Ignoring webhook type: {report.get('message', {}).get('type')}")
     
     print("=== END WEBHOOK DATA ===")
     
