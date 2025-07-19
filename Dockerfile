@@ -1,46 +1,45 @@
-# ─── build stage ───────────────────────────────────────────────────
-FROM python:3.11-slim AS builder
+# Use Python 3.11 slim image as base
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+# Set work directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
 
-# install everything in one go, with proper ASCII hyphens
-RUN pip install --no-cache-dir \
-      -r requirements.txt \
-      "django>=5.2.0" \
-      "uvicorn[standard]>=0.24.0" \
-      "gunicorn>=21.0.0"
+# Install Python dependencies including Django and uvicorn
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir \
+        django>=5.2.0 \
+        uvicorn[standard]>=0.24.0 \
+        gunicorn>=21.0.0
 
-# ─── runtime stage ─────────────────────────────────────────────────
-FROM python:3.11-slim
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PORT=8080
-
-WORKDIR /app
-
-# bring in your installed deps from the builder image
-COPY --from=builder /usr/local/lib/python3.11/site-packages \
-     /usr/local/lib/python3.11/site-packages
-
-# copy in your project files
+# Copy project files
 COPY . .
 
-# add your entrypoint that runs migrations/collectstatic at container startup
+# Copy and set up entrypoint script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh \
-  && adduser --disabled-password --gecos '' appuser \
-  && chown -R appuser /app
+RUN chmod +x /entrypoint.sh
 
+# Create a non-root user
+RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
 USER appuser
 
-EXPOSE 8080
+# Expose port
+EXPOSE $PORT
 
+# Use entrypoint script and run uvicorn
 ENTRYPOINT ["/entrypoint.sh"]
-
-# JSON‑array form avoids any stray-line parse errors
-CMD ["gunicorn", "api.asgi:application",
-     "-k", "uvicorn.workers.UvicornWorker",
-     "--bind", "0.0.0.0:$PORT",
-     "--workers", "2",
-     "--threads", "4"]
+CMD ["uvicorn", "api.asgi:application", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
