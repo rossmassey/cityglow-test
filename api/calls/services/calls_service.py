@@ -16,4 +16,14 @@ def get_all_calls():
         call_data['id'] = doc.id  # Include document ID
         calls_list.append(call_data)
     
-    return calls_list 
+    return calls_list
+
+
+def update_call_response_status(call_id: str, did_respond: bool):
+    """
+    Update the did_respond field for a specific call by ID.
+    """
+    calls_collection = get_calls_collection()
+    doc_ref = calls_collection.document(call_id)
+    doc_ref.update({'did_respond': did_respond})
+    return {'id': call_id, 'did_respond': did_respond} 

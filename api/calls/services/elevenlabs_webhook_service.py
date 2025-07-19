@@ -35,7 +35,8 @@ def handle_elevenlabs_webhook(report: dict):
             caller_name=report["data"]["analysis"]["data_collection_results"]["name"]["value"],
             success_evaluation=report["data"]["analysis"]["call_successful"],
             cost=report["data"]["metadata"]["cost"],
-            phone_number=report["data"]["metadata"]["phone_call"]["external_number"]
+            phone_number=report["data"]["metadata"]["phone_call"]["external_number"],
+            did_respond=False
         )
 
     except KeyError:

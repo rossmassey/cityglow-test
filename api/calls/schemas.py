@@ -17,6 +17,7 @@ class CallData(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow, description="When the record was created")
     cost: float = Field(default=0.0, description="Cost of the call")
     phone_number: Optional[str] = Field(default="", description="Client phone number")
+    did_respond: bool = Field(default=False, description="If the owner has responded to the call")
 
     @field_validator('summary',
                      'transcript',
@@ -44,7 +45,20 @@ class CallData(BaseModel):
                 "success_evaluation": "Good",
                 "created_at": "2025-07-19T00:08:16.000000",
                 "cost": 0.05,
-                "phone_number": "+1234567890"
+                "phone_number": "+1234567890",
+                "did_respond": False
+            }
+        }
+
+
+class CallEditRequest(BaseModel):
+    """Simple request model for editing call response status"""
+    did_respond: Optional[bool] = Field(None, description="Whether the owner has responded to this call")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "did_respond": True
             }
         }
 
