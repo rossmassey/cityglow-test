@@ -1,49 +1,40 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PORT=8080
-
-# Set work directory
+# ─── build stage ───────────────────────────────────────────────────
+FROM python:3.11-slim AS builder
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
 COPY requirements.txt .
+RUN pip install --no‑cache-dir \
+      -r requirements.txt \
+      django>=5.2.0 uvicorn[standard]>=0.24.0 gunicorn>=21.0.0
 
-# Install Python dependencies including Django and uvicorn
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir \
-        django>=5.2.0 \
-        uvicorn[standard]>=0.24.0 \
-        gunicorn>=21.0.0
+# ─── runtime stage ─────────────────────────────────────────────────
+FROM python:3.11-slim
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8080
 
-# Copy project files
+WORKDIR /app
+
+# copy installed deps from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages \
+     /usr/local/lib/python3.11/site-packages
+
+# copy your code
 COPY . .
 
-# Create directory for static files
-RUN mkdir -p /app/staticfiles
+# static & migrations at runtime via entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh \
+  && adduser --disabled-password --gecos '' appuser \
+  && chown -R appuser /app
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Run database migrations
-RUN python manage.py migrate
-
-# Create a non-root user
-RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
 USER appuser
-
-# Expose port
 EXPOSE $PORT
-
-# Command to run the application
-CMD exec uvicorn api.asgi:application --host 0.0.0.0 --port $PORT --workers 1 
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["gunicorn", "api.asgi:application",
+     "-k", "uvicorn.workers.UvicornWorker",
+     "--bind", "0.0.0.0:$PORT",
+     "--workers", "2",
+     "--threads", "4",
+     "--timeout", "120"]
+     
