@@ -160,6 +160,10 @@ SPECTACULAR_SETTINGS = {
             'description': 'Call management and webhook endpoints'
         },
         {
+            'name': 'ElevenLabs',
+            'description': 'ElevenLabs integration endpoints for webhooks and audio streaming'
+        },
+        {
             'name': 'Test',
             'description': 'Test endpoints for API health checks'
         },

@@ -16,19 +16,46 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
-def health_check(request):
-    """Simple health check endpoint"""
-    return JsonResponse({
-        "status": "healthy",
-    })
+class HealthCheckView(APIView):
+    """API health check endpoint"""
+
+    @extend_schema(
+        tags=['Test'],
+        summary='Health check',
+        description='Simple health check endpoint to verify API is running',
+        responses={
+            200: {
+                'description': 'API is healthy',
+                'content': {
+                    'application/json': {
+                        'schema': {
+                            'type': 'object',
+                            'properties': {
+                                'status': {
+                                    'type': 'string',
+                                    'example': 'healthy'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    )
+    def get(self, request):
+        """Check API health status"""
+        return Response({"status": "healthy"}, status=status.HTTP_200_OK)
 
 
 urlpatterns = [
-    path('', health_check, name='health-check'),
+    path('', HealthCheckView.as_view(), name='health-check'),
     path('admin/', admin.site.urls),
     path('calls/', include('api.calls.urls')),
 

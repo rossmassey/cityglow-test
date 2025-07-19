@@ -1,15 +1,18 @@
-from datetime import datetime
+import logging
+
 from django.http import JsonResponse
 
-from api.database import get_calls_collection
 from api.calls.schemas import CallData
+from api.database import get_calls_collection
+
+logger = logging.getLogger(__name__)
 
 
 def handle_elevenlabs_webhook(report: dict):
     """Handle ElevenLabs webhook data"""
-    print("=== ELEVENLABS WEBHOOK RECEIVED ===")
+    logger.info("=== ELEVENLABS WEBHOOK RECEIVED ===")
 
-    print(report)
+    logger.info(report)
 
     # concatenate transcript
     transcript_str = ""
@@ -19,14 +22,15 @@ def handle_elevenlabs_webhook(report: dict):
     # construct the API url that will stream the audio
     conversation_id = report["data"]["conversation_id"]
     recording_url = f"/calls/elevenlabs_stream/{conversation_id}/"
-    
+
     try:
         call_data = CallData(
             summary=report["data"]["analysis"]["transcript_summary"],
             transcript=transcript_str,
             recording_url=recording_url,
             started_at=report["data"]["metadata"]["start_time_unix_secs"],
-            ended_at=report["data"]["metadata"]["start_time_unix_secs"] + report["data"]["metadata"]["call_duration_secs"],
+            ended_at=report["data"]["metadata"]["start_time_unix_secs"] + report["data"]["metadata"][
+                "call_duration_secs"],
             ended_reason=report["data"]["metadata"]["termination_reason"],
             caller_name=report["data"]["analysis"]["data_collection_results"]["name"]["value"],
             success_evaluation=report["data"]["analysis"]["call_successful"],
@@ -35,20 +39,19 @@ def handle_elevenlabs_webhook(report: dict):
         )
 
     except KeyError:
-        print("ERROR: Could not parse elevenlabs webhook data!!")
-        return()
+        logger.error("ERROR: Could not parse elevenlabs webhook data!!")
+        return ()
 
     # Save to Firestore (convert to dict for Firestore)
     calls_collection = get_calls_collection()
     doc_ref = calls_collection.add(call_data.model_dump())
     doc_id = doc_ref[1].id
 
-    print(f"Saved call to Firestore with ID: {doc_id}")
-    print(f"Caller: {call_data.caller_name}")
-    print(f"Summary: {call_data.summary}")
+    logger.info(f"Saved call to Firestore with ID: {doc_id}")
+    logger.info(f"Caller: {call_data.caller_name}")
+    logger.info(f"Summary: {call_data.summary}")
 
-
-    print("=== END ELEVENLABS WEBHOOK DATA ===")
+    logger.info("=== END ELEVENLABS WEBHOOK DATA ===")
 
     # Return success response
     return JsonResponse({"status": "ok"})

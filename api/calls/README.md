@@ -42,9 +42,11 @@ This app uses a **Pydantic-only** approach for API documentation and validation.
 class MyRequest(BaseModel):
     name: str = Field(..., description="User name")
 
+
 class MyResponse(BaseModel):
     message: str
-    
+
+
 # 2. Use in views with OpenApiRequest/OpenApiResponse
 @extend_schema(
     request=OpenApiRequest(request=pydantic_to_openapi_schema(MyRequest)),
@@ -53,10 +55,10 @@ class MyResponse(BaseModel):
 def my_view(request):
     # Validate with Pydantic
     data = MyRequest(**request.data)
-    
+
     # Business logic returns Pydantic model
     result = MyService.do_something(data.name)
-    
+
     # Convert to dict for DRF Response
     return Response(result.model_dump())
 ```

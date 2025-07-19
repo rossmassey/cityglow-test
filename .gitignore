@@ -212,3 +212,6 @@ thespian-example/
 
 # firebase key
 firebase-key.json
+
+# staticfiles 
+staticfiles/

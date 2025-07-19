@@ -1,5 +1,5 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -45,5 +45,19 @@ class CallData(BaseModel):
                 "created_at": "2025-07-19T00:08:16.000000",
                 "cost": 0.05,
                 "phone_number": "+1234567890"
+            }
+        }
+
+
+class ErrorResponse(BaseModel):
+    """Generic error response model"""
+    error: str = Field(..., description="Error message")
+    details: Optional[str] = Field(None, description="Additional error details")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "error": "Invalid JSON",
+                "details": "Request body could not be parsed as valid JSON"
             }
         }
