@@ -73,3 +73,7 @@ https://eccf5589f22d.ngrok-free.app -> http://localhost:424
 
 vapi listen --forward-to localhost:8000/calls/vapi-webhook/
 
+## elevenlabs
+
+1. settings > post-call webhook
+2. agent > anaylsis > data collection (name)
