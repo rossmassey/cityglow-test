@@ -18,7 +18,7 @@ def handle_elevenlabs_webhook(report: dict):
 
     # construct the API url that will stream the audio
     conversation_id = report["data"]["conversation_id"]
-    recording_url = f"/calls/{conversation_id}/elevenlabs_stream/"
+    recording_url = f"/calls/elevenlabs_stream/{conversation_id}/"
     
     try:
         call_data = CallData(
