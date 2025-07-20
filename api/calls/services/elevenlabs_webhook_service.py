@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import pytz
 
 from django.http import JsonResponse
 
@@ -11,7 +12,7 @@ from api import settings
 logger = logging.getLogger(__name__)
 
 
-def format_call_email(call_data: CallData, doc_id: str):
+def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
     """Format call data into email subject and body"""
     
     # Format phone number for subject
@@ -23,18 +24,32 @@ def format_call_email(call_data: CallData, doc_id: str):
         # Format US number: XXXXXXXXXX -> (XXX) XXX-XXXX
         phone_display = f"({phone_display[:3]}) {phone_display[3:6]}-{phone_display[6:]}"
     
+    # Convert UTC datetime to specified timezone for display
+    display_datetime = None
+    if call_data.started_at:
+        # Ensure datetime is timezone-aware (assume UTC if naive)
+        if call_data.started_at.tzinfo is None:
+            utc_datetime = pytz.UTC.localize(call_data.started_at)
+        else:
+            utc_datetime = call_data.started_at.astimezone(pytz.UTC)
+        
+        # Convert to display timezone
+        target_tz = pytz.timezone(timezone)
+        display_datetime = utc_datetime.astimezone(target_tz)
+    
     # Format date for subject (MM/DD)
     date_str = ""
-    if call_data.started_at:
-        date_str = call_data.started_at.strftime("%m/%d")
+    if display_datetime:
+        date_str = display_datetime.strftime("%m/%d")
     
     # Create subject
     subject = f"[{date_str} Call from {phone_display}]"
     
-    # Format date and time for body
+    # Format date and time for body with timezone indicator
     formatted_date = ""
-    if call_data.started_at:
-        formatted_date = call_data.started_at.strftime("%B %d, %Y at %I:%M %p")
+    if display_datetime:
+        tz_abbr = "EST" if timezone == 'US/Eastern' else display_datetime.strftime("%Z")
+        formatted_date = display_datetime.strftime(f"%B %d, %Y at %I:%M %p ({tz_abbr})")
     
     # Calculate duration
     duration_str = "Unknown"
@@ -140,8 +155,8 @@ def handle_elevenlabs_webhook(report: dict):
     doc_ref = calls_collection.add(call_data.model_dump())
     doc_id = doc_ref[1].id
 
-    # Send formatted email summary
-    subject, plain_body, html_body = format_call_email(call_data, doc_id)
+    # Send formatted email summary (display times in EST)
+    subject, plain_body, html_body = format_call_email(call_data, doc_id, timezone='US/Eastern')
     send_email(settings.EMAIL_SUMMARY_RECIPIENT, subject, plain_body, html_body)
 
     logger.info(f"Saved call to Firestore with ID: {doc_id}")
