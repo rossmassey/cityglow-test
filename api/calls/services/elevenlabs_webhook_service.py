@@ -53,7 +53,7 @@ def handle_elevenlabs_webhook(report: dict):
 
     # Send email summary
     subject = f"Call Summary: {doc_id}"
-    send_email(settings.EMAIL_SUMMARY_RECIPIENT, subject, str(call_data)
+    send_email(settings.EMAIL_SUMMARY_RECIPIENT, subject, str(call_data))
 
     logger.info(f"Saved call to Firestore with ID: {doc_id}")
     logger.info(f"Caller: {call_data.caller_name}")
