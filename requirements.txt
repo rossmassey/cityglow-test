@@ -7,3 +7,4 @@ python-dotenv
 uvicorn[standard]>=0.24.0
 gunicorn>=21.0.0
 django-cors-headers
+pytz
