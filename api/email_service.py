@@ -41,22 +41,28 @@ def get_smtp_client():
     return smtp_client
 
 
-def send_email(to, subject, body):
+def send_email(to, subject, body, html_body=None):
     """
     Send an email using Gmail SMTP.
     
     Args:
         to (str): Recipient email address
         subject (str): Email subject
-        body (str): Email body content
+        body (str): Email body content (plain text)
+        html_body (str, optional): HTML version of email body
     """
     client = get_smtp_client()
     
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['From'] = settings.EMAIL_HOST_USER
     msg['To'] = to
     msg['Subject'] = subject
     
+    # Add plain text version
     msg.attach(MIMEText(body, 'plain'))
+    
+    # Add HTML version if provided
+    if html_body:
+        msg.attach(MIMEText(html_body, 'html'))
     
     client.send_message(msg) 
