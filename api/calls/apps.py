@@ -15,7 +15,7 @@ class CallsConfig(AppConfig):
             import logging
             logger = logging.getLogger(__name__)
             logger.warning(f"Failed to initialize Firebase: {e}")
-        
+
         try:
             from api.email_service import initialize_email
             initialize_email()

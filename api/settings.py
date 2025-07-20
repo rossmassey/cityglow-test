@@ -189,7 +189,6 @@ FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
 ELEVENLABS_BASE_URL = os.getenv('ELEVENLABS_BASE_URL', 'https://api.elevenlabs.io')
 ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 
-
 ###############################################################################
 # Google Configuration ------------------------------------------------------ #
 ###############################################################################

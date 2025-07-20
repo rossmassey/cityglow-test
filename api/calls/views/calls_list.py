@@ -33,4 +33,4 @@ class CallsListView(APIView):
         Get all calls from Firebase Firestore and return as JSON list
         """
         calls = get_all_calls()
-        return Response(calls, status=status.HTTP_200_OK) 
+        return Response(calls, status=status.HTTP_200_OK)

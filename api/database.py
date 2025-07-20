@@ -61,18 +61,3 @@ def get_firestore_client():
 def get_calls_collection():
     """Get reference to calls collection."""
     return get_firestore_client().collection('calls')
-
-
-def get_users_collection():
-    """Get reference to users collection."""
-    return get_firestore_client().collection('users')
-
-
-def get_messages_collection():
-    """Get reference to messages collection."""
-    return get_firestore_client().collection('messages')
-
-
-def get_logs_collection():
-    """Get reference to logs collection."""
-    return get_firestore_client().collection('logs')

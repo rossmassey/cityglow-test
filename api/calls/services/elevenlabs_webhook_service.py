@@ -1,20 +1,20 @@
 import logging
 from datetime import datetime
-import pytz
 
+import pytz
 from django.http import JsonResponse
 
+from api import settings
 from api.calls.schemas import CallData
 from api.database import get_calls_collection
 from api.email_service import send_email
-from api import settings
 
 logger = logging.getLogger(__name__)
 
 
 def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
     """Format call data into email subject and body"""
-    
+
     # Format phone number for subject
     phone_display = call_data.phone_number
     if phone_display and len(phone_display) == 11 and phone_display.startswith('1'):
@@ -23,7 +23,7 @@ def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
     elif phone_display and len(phone_display) == 10:
         # Format US number: XXXXXXXXXX -> (XXX) XXX-XXXX
         phone_display = f"({phone_display[:3]}) {phone_display[3:6]}-{phone_display[6:]}"
-    
+
     # Convert UTC datetime to specified timezone for display
     display_datetime = None
     if call_data.started_at:
@@ -32,25 +32,25 @@ def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
             utc_datetime = pytz.UTC.localize(call_data.started_at)
         else:
             utc_datetime = call_data.started_at.astimezone(pytz.UTC)
-        
+
         # Convert to display timezone
         target_tz = pytz.timezone(timezone)
         display_datetime = utc_datetime.astimezone(target_tz)
-    
+
     # Format date for subject (MM/DD)
     date_str = ""
     if display_datetime:
         date_str = display_datetime.strftime("%m/%d")
-    
+
     # Create subject
     subject = f"[{date_str} Call from {phone_display}]"
-    
+
     # Format date and time for body with timezone indicator
     formatted_date = ""
     if display_datetime:
         tz_abbr = "EST" if timezone == 'US/Eastern' else display_datetime.strftime("%Z")
         formatted_date = display_datetime.strftime(f"%B %d, %Y at %I:%M %p ({tz_abbr})")
-    
+
     # Calculate duration
     duration_str = "Unknown"
     if call_data.started_at and call_data.ended_at:
@@ -61,21 +61,21 @@ def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
             duration_str = f"{minutes}m {seconds}s"
         else:
             duration_str = f"{seconds}s"
-    
+
     # Create plain text body
     body_parts = []
     body_parts.append(f"Caller Phone Number: {call_data.phone_number}")
-    
+
     if call_data.caller_name and call_data.caller_name.strip():
         body_parts.append(f"Caller Name: {call_data.caller_name}")
-    
+
     body_parts.append(f"Date: {formatted_date}")
     body_parts.append(f"Duration: {duration_str}")
     body_parts.append(f"Summary: {call_data.summary}")
     body_parts.append(f"Full Transcript:\n{call_data.transcript}")
-    
+
     plain_body = "\n".join(body_parts)
-    
+
     # Create HTML body
     html_body = f"""
     <html>
@@ -105,7 +105,7 @@ def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
       </body>
     </html>
     """
-    
+
     return subject, plain_body, html_body
 
 
@@ -128,10 +128,10 @@ def handle_elevenlabs_webhook(report: dict):
         # Convert unix timestamps to datetime objects
         started_at = datetime.fromtimestamp(report["data"]["metadata"]["start_time_unix_secs"])
         ended_at = datetime.fromtimestamp(
-            report["data"]["metadata"]["start_time_unix_secs"] + 
+            report["data"]["metadata"]["start_time_unix_secs"] +
             report["data"]["metadata"]["call_duration_secs"]
         )
-        
+
         call_data = CallData(
             summary=report["data"]["analysis"]["transcript_summary"],
             transcript=transcript_str,
