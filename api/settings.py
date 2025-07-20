@@ -136,6 +136,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# add a slash to URLs if not given
+APPEND_SLASH = True
+
 ###############################################################################
 # DRF Settings -------------------------------------------------------------- #
 ###############################################################################
