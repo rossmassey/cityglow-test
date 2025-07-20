@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # cors
+    'corsheaders',
+
     # DRF
     'rest_framework',
 
@@ -57,6 +60,8 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -193,3 +198,32 @@ GOOGLE_APP_PASSWORD = os.getenv('GOOGLE_APP_PASSWORD')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 
 EMAIL_SUMMARY_RECIPIENT = os.getenv('EMAIL_SUMMARY_RECIPIENT')
+
+###############################################################################
+# CORS ---------------------------------------------------------------------- #
+###############################################################################
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+# # For production - specify your frontend domains
+# CORS_ALLOWED_ORIGINS = [
+#     “http://localhost:3000”,
+#     “http://127.0.0.1:3000”,
+#     “https://your-production-domain.com”,
+# ]
+
+# Allow credentials if needed
+CORS_ALLOW_CREDENTIALS = True
+
+# Specify allowed headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
