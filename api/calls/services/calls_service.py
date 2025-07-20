@@ -1,5 +1,8 @@
 import json
+import logging
 from api.database import get_calls_collection
+
+logger = logging.getLogger(__name__)
 
 
 def get_all_calls():
@@ -23,7 +26,21 @@ def update_call_response_status(call_id: str, did_respond: bool):
     """
     Update the did_respond field for a specific call by ID.
     """
+    logger.info(f"Marking {call_id} with did_respond: {did_respond}")
+    
     calls_collection = get_calls_collection()
     doc_ref = calls_collection.document(call_id)
-    doc_ref.update({'did_respond': did_respond})
-    return {'id': call_id, 'did_respond': did_respond} 
+    
+    # First check if the document exists
+    doc = doc_ref.get()
+    if not doc.exists:
+        logger.error(f"Document with ID {call_id} does not exist")
+        raise ValueError(f"Call with ID {call_id} not found")
+    
+    try:
+        doc_ref.update({'did_respond': did_respond})
+        return {'id': call_id, 'did_respond': did_respond}
+        
+    except Exception as e:
+        logger.error(f"Error updating call {call_id}: {str(e)}")
+        raise 
