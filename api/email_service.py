@@ -3,10 +3,13 @@ Email service for sending emails via Gmail SMTP.
 """
 
 import smtplib
+import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 # Global SMTP client
 smtp_client = None
@@ -65,4 +68,10 @@ def send_email(to, subject, body, html_body=None):
     if html_body:
         msg.attach(MIMEText(html_body, 'html'))
 
-    client.send_message(msg)
+    logger.info(f"Sending email from: {settings.EMAIL_HOST_USER}, to: {to}, subject: {subject}")
+    logger.info(f"Email body: {body}")
+
+    try:
+        client.send_message(msg)
+    except Exception as e:
+        logger.error(f"Error sending email: {e}")
