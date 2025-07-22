@@ -112,7 +112,6 @@ def format_call_email(call_data: CallData, doc_id: str, timezone='US/Eastern'):
 def handle_elevenlabs_webhook(report: dict):
     """Handle ElevenLabs webhook data"""
     logger.info("=== ELEVENLABS WEBHOOK RECEIVED ===")
-
     logger.info(report)
 
     # concatenate transcript
@@ -125,6 +124,11 @@ def handle_elevenlabs_webhook(report: dict):
     recording_url = f"/calls/elevenlabs_stream/{conversation_id}/"
 
     try:
+        phone_number = report["data"]["metadata"]["phone_call"]["external_number"]
+        if phone_number in settings.DEBUG_NUMBERS:
+            logger.info(f"Debug number found, not saving to database: {phone_number}")
+            return()
+
         # Convert unix timestamps to datetime objects
         started_at = datetime.fromtimestamp(report["data"]["metadata"]["start_time_unix_secs"])
         ended_at = datetime.fromtimestamp(
@@ -142,7 +146,7 @@ def handle_elevenlabs_webhook(report: dict):
             caller_name=report["data"]["analysis"]["data_collection_results"]["name"]["value"],
             success_evaluation=report["data"]["analysis"]["call_successful"],
             cost=report["data"]["metadata"]["cost"],
-            phone_number=report["data"]["metadata"]["phone_call"]["external_number"],
+            phone_number=phone_number,
             did_respond=False
         )
 
@@ -163,7 +167,7 @@ def handle_elevenlabs_webhook(report: dict):
     logger.info(f"Caller: {call_data.caller_name}")
     logger.info(f"Summary: {call_data.summary}")
 
-    logger.info("=== END ELEVENLABS WEBHOOK DATA ===")
+
 
     # Return success response
     return JsonResponse({"status": "ok"})

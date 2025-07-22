@@ -140,6 +140,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = True
 
 ###############################################################################
+# API Settings -------------------------------------------------------------- #
+###############################################################################
+# Load debug numbers from environment variable (comma-separated)
+DEBUG_NUMBERS_STR = os.getenv('DEBUG_NUMBERS')
+DEBUG_NUMBERS = [num.strip() for num in DEBUG_NUMBERS_STR.split(',') if num.strip()]
+
+###############################################################################
 # DRF Settings -------------------------------------------------------------- #
 ###############################################################################
 
